@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>唱歌的女孩</title>
+    <meta charset="UTF-8">
+    <style>
+        /* 使用 Google Fonts 的 Material Icons */
+        @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+        canvas {
+            border: 1px solid black;
+            background: #f0f0f0;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Music&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
+    </style>
+</head>
+<body>
+    <!-- 添加音频元素，设置自动播放和循环 -->
+    <audio id="bgMusic" autoplay loop>
+        <source src="audio.m4a" type="audio/mp4">
+    </audio>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+        // 获取音频元素
+        const bgMusic = document.getElementById('bgMusic');
+        
+        // 确保音频播放（因为某些浏览器可能会阻止自动播放）
+        document.addEventListener('click', () => {
+            bgMusic.play();
+        }, { once: true });
+
+        class SingingGirl {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.x = canvas.width / 2;
+                this.y = canvas.height / 2;
+                this.musicNotes = [];
+                this.frame = 0;
+                
+                this.girlImage = new Image();
+                this.girlImage.src = 'mygirl.jpg';
+                this.imageLoaded = false;
+                
+                this.girlImage.onload = () => {
+                    this.imageLoaded = true;
+                    this.imageWidth = 150;
+                    this.imageHeight = 150;
+                };
+
+                this.angle = 0;
+                this.scale = 1;
+
+                // 创建音符图片
+                this.noteImage = new Image();
+                this.noteImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgM3YxMC41NWMtLjU5LS4zNC0xLjI3LS41NS0yLS41NS0yLjIxIDAtNCAxLjc5LTQgNHMxLjc5IDQgNCA0IDQtMS43OSA0LTR2LTEwLjV6Ii8+PC9zdmc+';
+
+                // 在 SingingGirl 类的 constructor 中添加音符数组
+                this.musicSymbols = ['♪', '♩', '♫', '♬'];
+            }
+
+            draw() {
+                if (this.imageLoaded) {
+                    this.ctx.save();
+                    this.ctx.translate(this.x, this.y);
+                    
+                    this.angle = Math.sin(this.frame * 0.05) * 0.1;
+                    this.ctx.rotate(this.angle);
+                    
+                    this.scale = 1 + Math.sin(this.frame * 0.1) * 0.03;
+                    this.ctx.scale(this.scale, this.scale);
+
+                    this.ctx.drawImage(
+                        this.girlImage,
+                        -this.imageWidth / 2,
+                        -this.imageHeight / 2,
+                        this.imageWidth,
+                        this.imageHeight
+                    );
+
+                    this.ctx.restore();
+                }
+
+                // 绘制"鈴"和音符图片
+                this.musicNotes.forEach((note, index) => {
+                    this.ctx.fillStyle = note.color;
+                    this.ctx.font = '24px "Wingding", serif';
+                    this.ctx.fillText(note.symbol, note.x, note.y);
+                    
+                    note.y -= 2;
+                    note.x += Math.sin(this.frame * 0.05 + index) * 0.5;
+                });
+
+                if (this.frame % 15 === 0) {
+                    const colors = ['#FF69B4', '#9400D3', '#4169E1'];  // 粉色、紫色、蓝色
+                    this.musicNotes.push({
+                        x: this.x + 40,
+                        y: this.y,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        symbol: this.musicSymbols[Math.floor(Math.random() * this.musicSymbols.length)]
+                    });
+                }
+
+                this.musicNotes = this.musicNotes.filter(note => note.y > 0);
+                this.frame++;
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const game = new SingingGirl(canvas);
+        game.animate();
+    </script>
+</body>
+</html> 
