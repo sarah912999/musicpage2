@@ -9,7 +9,7 @@ class SingingGirl {
         
         // 创建图片对象
         this.girlImage = new Image();
-        this.girlImage.src = 'mygirl.jpg';  // 使用你刚才的照片
+        this.girlImage.src = './mygirl.JPG';  // 使用你刚才的照片
         this.imageLoaded = false;
         
         // 当图片加载完成时设置标志
